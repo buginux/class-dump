@@ -107,6 +107,7 @@ NSString *CDSegmentEncryptionTypeName(CDSegmentEncryptionType type)
 
 - (BOOL)isProtected;
 {
+    // 疑问：SG_PROTECTED_VERSION_1 是什么意思？
     return (self.flags & SG_PROTECTED_VERSION_1) == SG_PROTECTED_VERSION_1;
 }
 
@@ -118,6 +119,7 @@ NSString *CDSegmentEncryptionTypeName(CDSegmentEncryptionType type)
             // First three pages aren't encrypted, so we can't tell.  Let's pretent it's something we can decrypt.
             return CDSegmentEncryptionType_AES;
         } else {
+            // 疑问：从这段代码中看，似乎是 LC_Segment 页开始时会有加密？
             const void *src = (uint8_t *)[self.machOFile.data bytes] + self.fileoff + 3 * PAGE_SIZE;
 
             uint32_t magic = OSReadLittleInt32(src, 0);
@@ -135,6 +137,10 @@ NSString *CDSegmentEncryptionTypeName(CDSegmentEncryptionType type)
     return CDSegmentEncryptionType_None;
 }
 
+
+/**
+ 疑问：这里的加密与 LC_ENCRYPTION_INFO	的加密是否为同一个东西
+ */
 - (BOOL)canDecrypt;
 {
     CDSegmentEncryptionType encryptionType = self.encryptionType;

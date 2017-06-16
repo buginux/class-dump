@@ -119,7 +119,7 @@ NSString *CDErrorKey_Exception    = @"CDErrorKey_Exception";
     //NSLog(@"targetArch: (%08x, %08x)", targetArch.cputype, targetArch.cpusubtype);
     CDMachOFile *machOFile = [file machOFileWithArch:_targetArch];
     //NSLog(@"machOFile: %@", machOFile);
-    if (machOFile == nil) {
+    if (machOFile == nil) { // 找不到目标构架的 MachO 文件
         if (error != NULL) {
             NSString *failureReason;
             NSString *targetArchName = CDNameForCPUType(_targetArch.cputype, _targetArch.cpusubtype);
@@ -140,7 +140,7 @@ NSString *CDErrorKey_Exception    = @"CDErrorKey_Exception";
     [_machOFiles addObject:machOFile];
     _machOFilesByName[machOFile.filename] = machOFile;
 
-    if ([self shouldProcessRecursively]) {
+    if ([self shouldProcessRecursively]) { // 疑问：这个递归处理指的是啥？
         @try {
             for (CDLoadCommand *loadCommand in [machOFile loadCommands]) {
                 if ([loadCommand isKindOfClass:[CDLCDylib class]]) {
@@ -184,6 +184,7 @@ NSString *CDErrorKey_Exception    = @"CDErrorKey_Exception";
 {
     for (CDMachOFile *machOFile in self.machOFiles) {
         CDObjectiveCProcessor *processor = [[[machOFile processorClass] alloc] initWithMachOFile:machOFile];
+        // 如果是 Objective-C 2.0 的代码，直接走父类的处理逻辑
         [processor process];
         [_objcProcessors addObject:processor];
     }

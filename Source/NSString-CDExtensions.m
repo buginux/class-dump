@@ -57,6 +57,7 @@
     NSString *path;
 
     // I give up, all the methods dealing with paths seem to resolve symlinks with a vengence.
+    // 如果指定的路径是 .app，刚到里面寻找可执行文件
     NSBundle *bundle = [NSBundle bundleWithPath:self];
     if (bundle != nil) {
         if ([bundle executablePath] == nil)

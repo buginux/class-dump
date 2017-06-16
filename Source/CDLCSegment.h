@@ -30,7 +30,7 @@ extern NSString *CDSegmentEncryptionTypeName(CDSegmentEncryptionType type);
 @property (nonatomic, readonly) NSUInteger filesize;
 @property (nonatomic, readonly) vm_prot_t initprot;
 @property (nonatomic, readonly) uint32_t flags;
-@property (nonatomic, readonly) BOOL isProtected;
+@property (nonatomic, readonly) BOOL isProtected; ///< 这个 protected 代表什么意思
 
 @property (nonatomic, readonly) CDSegmentEncryptionType encryptionType;
 @property (nonatomic, readonly) BOOL canDecrypt;

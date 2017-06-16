@@ -102,6 +102,7 @@ int main(int argc, char *argv[])
 
         CDClassDump *classDump = [[CDClassDump alloc] init];
 
+        // 命令参数解析
         while ( (ch = getopt_long(argc, argv, "aAC:f:HIo:rRsSt", longopts, NULL)) != -1) {
             switch (ch) {
                 case CD_OPT_ARCH: {
@@ -245,10 +246,13 @@ int main(int argc, char *argv[])
             exit(0);
         }
 
+        // 真正执行二进制文件解析
         if (optind < argc) {
             NSString *arg = [NSString stringWithFileSystemRepresentation:argv[optind]];
+            // 获取可执行文件路径
             NSString *executablePath = [arg executablePathForFilename];
-            if (shouldListArches) {
+            
+            if (shouldListArches) { // 打印可执行文件中的所有构架
                 if (executablePath == nil) {
                     printf("none\n");
                 } else {
@@ -273,7 +277,7 @@ int main(int argc, char *argv[])
 
                 classDump.searchPathState.executablePath = [executablePath stringByDeletingLastPathComponent];
                 CDFile *file = [CDFile fileWithContentsOfFile:executablePath searchPathState:classDump.searchPathState];
-                if (file == nil) {
+                if (file == nil) { // 解析 MachO 出错
                     NSFileManager *defaultManager = [NSFileManager defaultManager];
                     
                     if ([defaultManager fileExistsAtPath:executablePath]) {
@@ -289,7 +293,7 @@ int main(int argc, char *argv[])
                     exit(1);
                 }
 
-                if (hasSpecifiedArch == NO) {
+                if (hasSpecifiedArch == NO) { // 用户没有指定构架，则自动寻找最适合构架
                     if ([file bestMatchForLocalArch:&targetArch] == NO) {
                         fprintf(stderr, "Error: Couldn't get local architecture\n");
                         exit(1);
@@ -306,22 +310,22 @@ int main(int argc, char *argv[])
                 if (![classDump loadFile:file error:&error]) {
                     fprintf(stderr, "Error: %s\n", [[error localizedFailureReason] UTF8String]);
                     exit(1);
-                } else {
+                } else { // 整个程序的主要处理逻辑
                     [classDump processObjectiveCData];
                     [classDump registerTypes];
                     
-                    if (searchString != nil) {
+                    if (searchString != nil) { // 参数中指定了搜索字符串
                         CDFindMethodVisitor *visitor = [[CDFindMethodVisitor alloc] init];
                         visitor.classDump = classDump;
                         visitor.searchString = searchString;
                         [classDump recursivelyVisit:visitor];
-                    } else if (shouldGenerateSeparateHeaders) {
+                    } else if (shouldGenerateSeparateHeaders) { // 将符号信息生成到不同的头文件中（最常用的方法）
                         CDMultiFileVisitor *multiFileVisitor = [[CDMultiFileVisitor alloc] init];
                         multiFileVisitor.classDump = classDump;
                         classDump.typeController.delegate = multiFileVisitor;
                         multiFileVisitor.outputPath = outputPath;
                         [classDump recursivelyVisit:multiFileVisitor];
-                    } else {
+                    } else { // 将符号信息生成到同一个头文件中
                         CDClassDumpVisitor *visitor = [[CDClassDumpVisitor alloc] init];
                         visitor.classDump = classDump;
                         if ([hiddenSections containsObject:@"structures"]) visitor.shouldShowStructureSection = NO;

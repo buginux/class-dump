@@ -401,6 +401,14 @@ static NSString *CDMachOFileMagicNumberDescription(uint32_t magic)
 
 #pragma mark -
 
+
+/**
+ MachO 文件是否加密
+ 
+ otool -l WeChat.app/WeChat | grep -B 2 crypt
+
+ @return 文件是否加密
+ */
 - (BOOL)isEncrypted;
 {
     for (CDLoadCommand *loadCommand in _loadCommands) {
@@ -563,6 +571,12 @@ static NSString *CDMachOFileMagicNumberDescription(uint32_t magic)
     return [self segmentWithName:@"__OBJC"] != nil;
 }
 
+
+/**
+ 从常数段中识别代码是否为 Objective-C 2.0
+
+ @return 是否为 Objective-C 2.0 代码
+ */
 - (BOOL)hasObjectiveC2Data;
 {
     // http://twitter.com/gparker/status/17962955683

@@ -85,6 +85,9 @@
 
 - (void)loadSymbols;
 {
+    // 疑问：这里获取到 LC_Segment 来取得虚拟内存的基地址，但是通过 CD_VM_PORT_RW 来进行判断不是很理解
+    // 同时，对于 LC_Segment 中作用还不是理解得很透彻，它是用于帮助将 Segment 映射到虚拟内存中，是映射自己的
+    // Segment 呢，还是映射全部的 Segment。从这里的代码看来是映射全部的，但是还是不确定。
     for (CDLoadCommand *loadCommand in [self.machOFile loadCommands]) {
         if ([loadCommand isKindOfClass:[CDLCSegment class]]) {
             CDLCSegment *segment = (CDLCSegment *)loadCommand;
@@ -121,7 +124,7 @@
         }
     };
 
-    if (![self.machOFile uses64BitABI]) {
+    if (![self.machOFile uses64BitABI]) { // 32 位架构
         //NSLog(@"32 bit...");
         //NSLog(@"       str table index  type  sect  desc  value");
         //NSLog(@"       ---------------  ----  ----  ----  --------");
@@ -146,7 +149,7 @@
         }
 
         //NSLog(@"Loaded %lu 32-bit symbols", [symbols count]);
-    } else {
+    } else { // 64 位架构
         //NSLog(@"       str table index  type  sect  desc  value");
         //NSLog(@"       ---------------  ----  ----  ----  ----------------");
         for (uint32_t index = 0; index < _symtabCommand.nsyms; index++) {
